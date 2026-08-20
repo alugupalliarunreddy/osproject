@@ -3,11 +3,16 @@
 This project is developed as part of the Operating Systems and Systems Programming (OSSP) Project-Based Learning course.
 
 ## Week 1 Features
-
 - Interactive REPL loop
 - Makefile-based build
 - Git repository
 - Linux development environment
+
+## Week 2 Features
+- Dynamic command input
+- Memory allocation using malloc()
+- Automatic buffer expansion using realloc()
+- Proper memory cleanup using free()
 
 ## Project Structure
 
@@ -17,9 +22,11 @@ osproject/
 ├── Makefile
 ├── .gitignore
 ├── include/
-│   └── shell.h
+│   ├── shell.h
+│   └── input.h
 ├── src/
-│   └── main.c
+│   ├── main.c
+│   └── input.c
 ├── docs/
 ├── tests/
 ├── screenshots/
@@ -29,6 +36,7 @@ osproject/
 ## Build
 
 ```bash
+make clean
 make
 ```
 
@@ -44,6 +52,7 @@ make run
 make clean
 ```
 
-## Week 1 Milestone
+## Week 2 Milestone
 
-Implemented the basic REPL loop and project repository structure.
+Implemented dynamic input using heap memory with malloc() and realloc(),
+and released allocated memory using free().
