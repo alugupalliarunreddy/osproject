@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -std=c11 -Wall -Wextra -Wpedantic -Werror -Iinclude
 TARGET = bin/vmem
-SOURCES = src/main.c src/input.c src/vmem.c
+SOURCES = src/main.c src/vmem.c
 OBJECTS = $(SOURCES:.c=.o)
 
 .PHONY: all clean run test
