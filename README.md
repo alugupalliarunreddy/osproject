@@ -1,58 +1,23 @@
-# OS Project
+# Virtual Memory Management Utility — OSSP Week 2
 
-This project is developed as part of the Operating Systems and Systems Programming (OSSP) Project-Based Learning course.
+Working Week 2 milestone: interactive REPL with dynamically allocated input.
 
-## Week 1 Features
-- Interactive REPL loop
-- Makefile-based build
-- Git repository
-- Linux development environment
+**Scope:** This is the foundation for the Virtual Memory Management Utility. Page tables, virtual-to-physical address translation, and page replacement are not implemented yet.
 
-## Week 2 Features
-- Dynamic command input
-- Memory allocation using malloc()
-- Automatic buffer expansion using realloc()
-- Proper memory cleanup using free()
-
-## Project Structure
-
-```text
-osproject/
-├── README.md
-├── Makefile
-├── .gitignore
-├── include/
-│   ├── shell.h
-│   └── input.h
-├── src/
-│   ├── main.c
-│   └── input.c
-├── docs/
-├── tests/
-├── screenshots/
-└── bin/
+## Build and run (Ubuntu/WSL)
+Install tools if needed:
+```bash
+sudo apt update
+sudo apt install build-essential python3
 ```
-
-## Build
-
+From this folder:
 ```bash
 make clean
 make
-```
-
-## Run
-
-```bash
 make run
 ```
-
-## Clean
-
+Run the long-input test:
 ```bash
-make clean
+make test
 ```
-
-## Week 2 Milestone
-
-Implemented dynamic input using heap memory with malloc() and realloc(),
-and released allocated memory using free().
+Commands: `help`, `status`, `exit`, `quit`. Other input is echoed, including long lines.

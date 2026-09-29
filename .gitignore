@@ -1,4 +1,1 @@
-bin/
-*.o
-*.exe
-*.out
+bin/\n*.o\n*.out\n*.exe\n
