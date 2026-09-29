@@ -35,7 +35,7 @@ The simulator is implemented in C using dynamically allocated data structures an
 
 | Component            | Technology                                   |
 | -------------------- | -------------------------------------------- |
-| Programming language | C (C11)                                      |
+| Programming language | C                                     |
 | Compiler             | GCC                                          |
 | Build system         | GNU Make                                     |
 | Operating system     | Linux / Ubuntu                               |
