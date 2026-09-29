@@ -1,21 +1,25 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -std=c11 -g -Iinclude
-SRC = src/main.c src/input.c
+CFLAGS = -std=c11 -Wall -Wextra -Wpedantic -Werror -Iinclude
 TARGET = bin/vmem
+SOURCES = src/main.c src/input.c src/vmem.c
+OBJECTS = $(SOURCES:.c=.o)
 
-.PHONY: all run clean test
+.PHONY: all clean run test
 
 all: $(TARGET)
 
-$(TARGET): $(SRC) include/input.h include/vmem.h
-	mkdir -p bin
-	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
+$(TARGET): $(OBJECTS)
+	@mkdir -p bin
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET)
+
+src/%.o: src/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 run: $(TARGET)
 	./$(TARGET)
 
 test: $(TARGET)
-	bash tests/test_long_input.sh
+	bash tests/smoke_test.sh
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(OBJECTS) $(TARGET)

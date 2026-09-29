@@ -1,1 +1,4 @@
-bin/\n*.o\n*.out\n*.exe\n
+bin/vmem
+src/*.o
+*.out
+*.log
