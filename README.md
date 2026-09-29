@@ -1,110 +1,224 @@
 # Virtual Memory Management Utility (VMU)
 
-**Operating Systems and Systems Programming (OSSP) Project**  
-**Language:** C (C11)  
-**Platform:** Linux / Ubuntu  
-**Build system:** GNU Make
+A command-line virtual memory simulator written in C that demonstrates address translation, page faults, page tables, and FIFO/LRU page-replacement algorithms.
 
-## 1. Project overview
+**Operating Systems and Systems Programming (OSSP) Project**
 
-The Virtual Memory Management Utility is a terminal-based educational simulator that demonstrates how an operating system translates virtual addresses into physical addresses and handles page faults when a requested page is not currently loaded in physical memory.
+![Language](https://img.shields.io/badge/Language-C11-blue)
+![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Ubuntu-orange)
+![Build](https://img.shields.io/badge/Build-GNU%20Make-green)
+![Project](https://img.shields.io/badge/Type-Educational%20Simulator-purple)
 
-This is a user-space simulation. It does **not** read or modify the host operating system's real page tables, physical memory, or kernel memory. Instead, it models the key concepts using C data structures.
+## Overview
 
-The utility currently supports:
+The Virtual Memory Management Utility (VMU) is a terminal-based educational simulator designed to demonstrate fundamental virtual memory management concepts used in operating systems.
 
-- Configurable page size and number of physical frames.
-- A virtual address space divided into pages.
-- Page-table entries that track whether a page is present and which frame contains it.
-- Virtual-to-physical address translation.
-- Page-fault counting.
-- FIFO and LRU page-replacement policies.
-- Interactive commands to inspect status, access addresses, change policy, and reset the simulator.
-- Input validation and dynamically allocated input storage.
+The project models how virtual addresses are translated into physical addresses, how page tables maintain page mappings, and how page faults are handled when a requested page is not currently loaded into physical memory.
 
-## 2. Concepts demonstrated
+The simulator is implemented in C using dynamically allocated data structures and a modular design.
 
-### Virtual address
+> **Note:** VMU is a user-space simulation. It does not access or modify the host operating system's actual page tables, physical memory, or kernel memory.
 
-A virtual address is split into two components:
+## Features
 
-`virtual address = virtual page number × page size + offset`
+* **Virtual address translation:** Converts virtual addresses into physical addresses using page numbers, offsets, and frame mappings.
+* **Page table management:** Tracks page presence and frame assignments.
+* **Page-fault handling:** Simulates loading pages into free frames and handling memory replacement when frames are full.
+* **FIFO replacement:** Implements the First-In, First-Out page-replacement algorithm.
+* **LRU replacement:** Implements the Least Recently Used page-replacement algorithm.
+* **Configurable memory:** Supports configurable virtual pages, physical frames, and page sizes.
+* **Interactive CLI:** Provides commands to access addresses, inspect memory state, view statistics, and reset the simulator.
+* **Dynamic input handling:** Uses dynamically allocated input buffers instead of fixed-size input arrays.
+* **Memory statistics:** Tracks accesses, page faults, hits, evictions, and page-fault rate.
 
-The simulator computes:
+## Technology Stack
 
-- `page_number = virtual_address / page_size`
-- `offset = virtual_address % page_size`
+| Component            | Technology                                   |
+| -------------------- | -------------------------------------------- |
+| Programming language | C (C11)                                      |
+| Compiler             | GCC                                          |
+| Build system         | GNU Make                                     |
+| Operating system     | Linux / Ubuntu                               |
+| Input handling       | Standard C I/O and dynamic memory allocation |
 
-If the page is resident in a physical frame, the physical address is:
+## Architecture
 
-`physical_address = frame_number × page_size + offset`
+The project follows a modular structure that separates the command-line interface, input handling, and virtual memory simulation logic.
 
-### Page table
+```text
+                 User
+                  |
+                  v
+          Command-Line Interface
+                main.c
+                  |
+          +-------+-------+
+          |               |
+          v               v
+      input.c          vmem.c
+   Input Handling   Memory Simulator
+                          |
+               +----------+----------+
+               |                     |
+               v                     v
+          Page Table            Frame Table
+               |                     |
+               +----------+----------+
+                          |
+                          v
+             Address Translation
+              and Replacement
+```
 
-Each virtual page has a page-table entry. An entry records whether the page is present, its frame number when present, and metadata used by the replacement algorithm.
+### Module Responsibilities
 
-### Page fault
+| Module    | Responsibility                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------------- |
+| `main.c`  | Handles command parsing, startup configuration, and the interactive interface.                          |
+| `input.c` | Reads input lines using dynamically allocated memory.                                                   |
+| `vmem.c`  | Implements page tables, frame management, address translation, page faults, and replacement algorithms. |
+| `vmem.h`  | Defines simulator data structures and public function declarations.                                     |
+| `input.h` | Declares the dynamic input interface.                                                                   |
 
-A page fault occurs in this simulator when an address references a valid virtual page that is not currently resident in a physical frame. The simulator loads the page into a free frame, or evicts a resident page according to the selected replacement policy.
+## Virtual Memory Concepts
 
-### Replacement policies
+### 1. Address Translation
 
-- **FIFO (First-In, First-Out):** evicts the page that has been resident for the longest time.
-- **LRU (Least Recently Used):** evicts the page whose most recent access is oldest.
+A virtual address is divided into a virtual page number and an offset.
 
-These policies are simplified educational models, not implementations of a production kernel's memory manager.
+```text
+Virtual Address = Page Number × Page Size + Offset
+```
 
-## 3. Requirements
+The simulator calculates:
 
-On Ubuntu or a similar Linux distribution:
+```c
+page_number = virtual_address / page_size;
+offset = virtual_address % page_size;
+```
 
-- GCC or another C11-compatible compiler
-- GNU Make
-- Bash (for the optional shell test script)
+If the page is present in a physical frame, the physical address is calculated as:
 
-Install the tools:
+```c
+physical_address = frame_number * page_size + offset;
+```
+
+### 2. Page Table
+
+The page table maintains information about each virtual page, including:
+
+* Whether the page is currently present in physical memory.
+* The physical frame containing the page.
+* The page's load timestamp.
+* The page's last-used timestamp.
+
+### 3. Page Faults
+
+A page fault occurs when a valid virtual address references a page that is not currently loaded into a physical frame.
+
+The simulator handles this by:
+
+1. Identifying the requested virtual page.
+2. Searching for an available physical frame.
+3. Loading the page into a free frame if one exists.
+4. Otherwise, selecting a victim page using the configured replacement policy.
+5. Updating the page table and frame table.
+6. Calculating and displaying the physical address.
+
+### 4. Page-Replacement Algorithms
+
+| Algorithm | Description                                                        |
+| --------- | ------------------------------------------------------------------ |
+| FIFO      | Replaces the resident page that was loaded earliest.               |
+| LRU       | Replaces the resident page whose most recent access is the oldest. |
+
+FIFO uses page load timestamps, while LRU uses logical access timestamps.
+
+These implementations are simplified educational models and do not represent all the mechanisms used by production operating systems.
+
+## Project Structure
+
+```text
+osproject/
+├── include/
+│   ├── input.h
+│   └── vmem.h
+├── src/
+│   ├── input.c
+│   ├── main.c
+│   └── vmem.c
+├── tests/
+│   └── smoke_test.sh
+├── docs/
+│   └── DESIGN.md
+├── Makefile
+├── .gitignore
+└── README.md
+```
+
+## Getting Started
+
+### Prerequisites
+
+The following tools are required:
+
+* GCC or another C11-compatible compiler.
+* GNU Make.
+* Bash for the smoke test.
+
+On Ubuntu, install the dependencies:
 
 ```bash
 sudo apt update
-sudo apt install build-essential make
+sudo apt install build-essential make git -y
 ```
 
-## 4. Build and run
+### Clone the Repository
 
-From the project root:
+```bash
+git clone https://github.com/alugupalliarunreddy/osproject.git
+cd osproject
+```
+
+### Build the Project
+
+Compile the source code from the project root:
 
 ```bash
 make clean
 make
+```
+
+The executable is generated at:
+
+```text
+bin/vmem
+```
+
+### Run the Simulator
+
+```bash
 ./bin/vmem
 ```
 
-Or build and launch in one command:
+Alternatively, compile and launch the program using:
 
 ```bash
 make run
 ```
 
-Run the basic automated smoke test:
+## Usage
 
-```bash
-make test
-```
-
-The test exercises address translation, replacement-policy commands, status output, and reset behavior. It is a lightweight smoke test, not a formal proof of correctness.
-
-## 5. First session
-
-Start the program:
+After launching the simulator, the interactive command prompt appears:
 
 ```text
-$ ./bin/vmem
 Virtual Memory Management Utility
+Educational user-space simulator; does not alter real OS memory.
 Type 'help' to see available commands.
-vm> help
+vm>
 ```
 
-Try the following sequence:
+### Example Session
 
 ```text
 vm> status
@@ -112,163 +226,137 @@ vm> access 0
 vm> access 4096
 vm> access 8192
 vm> access 0
-vm> policy lru
-vm> access 12288
 vm> pages
 vm> frames
 vm> stats
 vm> exit
 ```
 
-The default configuration is 16 virtual pages, 4 physical frames, and 4096-byte pages. These values are configurable at startup:
+The default configuration consists of:
+
+| Parameter          | Default Value |
+| ------------------ | ------------: |
+| Virtual pages      |            16 |
+| Physical frames    |             4 |
+| Page size          |    4096 bytes |
+| Replacement policy |          FIFO |
+
+### Custom Configuration
+
+The simulator accepts command-line arguments to configure the virtual memory environment.
 
 ```bash
 ./bin/vmem --pages 32 --frames 3 --page-size 1024
 ```
 
-The number of virtual pages must be positive, the number of frames must be positive and no greater than the number of virtual pages, and the page size must be a positive power of two. The simulator uses unsigned integer addresses.
+This creates a virtual address space with 32 pages, 3 physical frames, and a page size of 1024 bytes.
 
-## 6. Interactive command reference
+Configuration requirements:
 
-| Command | Description |
-|---|---|
-| `help` | Print the command list. |
-| `status` | Show configuration, current policy, and counters. |
-| `access ADDRESS` | Translate and access a decimal virtual address. |
-| `pages` | Show each virtual page's presence and frame mapping. |
-| `frames` | Show the virtual page currently stored in each physical frame. |
-| `stats` | Show accesses, page faults, hits, and evictions. |
-| `policy fifo` | Select FIFO replacement. |
-| `policy lru` | Select LRU replacement. |
-| `reset` | Clear page/frame state and counters. |
-| `help` | Display help. |
-| `exit` or `quit` | Exit the utility. |
+* The number of virtual pages must be greater than zero.
+* The number of physical frames must be greater than zero and no greater than the number of virtual pages.
+* The page size must be a positive power of two.
 
-Addresses are entered as decimal non-negative integers. An address outside the configured virtual address space is rejected.
+## Command Reference
 
-## 7. Project structure
+| Command          | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| `help`           | Displays the available commands.                                     |
+| `status`         | Displays simulator configuration and the current replacement policy. |
+| `access ADDRESS` | Accesses and translates a virtual address.                           |
+| `pages`          | Displays the virtual page table.                                     |
+| `frames`         | Displays the physical frame table.                                   |
+| `stats`          | Displays memory access and page-fault statistics.                    |
+| `policy fifo`    | Selects FIFO replacement.                                            |
+| `policy lru`     | Selects LRU replacement.                                             |
+| `reset`          | Clears memory mappings and resets statistics.                        |
+| `exit`           | Exits the simulator.                                                 |
+| `quit`           | Exits the simulator.                                                 |
 
-```text
-VirtualMemoryUtility_Full_Project/
-├── include/
-│   ├── input.h       # Dynamic line-input interface
-│   └── vmem.h        # VM types and public simulator functions
-├── src/
-│   ├── input.c       # Safe dynamically growing input reader
-│   ├── main.c        # CLI, command parsing, and startup options
-│   └── vmem.c        # Page table, frames, translation, FIFO/LRU
-├── tests/
-│   └── smoke_test.sh # Basic command-line smoke test
-├── docs/
-│   └── DESIGN.md     # Design notes and algorithms
-├── Makefile
-├── .gitignore
-└── README.md
-```
+Addresses must be entered as non-negative decimal integers. Addresses outside the configured virtual address space are rejected.
 
-## 8. Design and implementation notes
+## Testing
 
-The command-line interface is kept separate from the memory simulator. `main.c` reads and parses commands, while `vmem.c` owns the simulated memory state and implements translation and replacement. `input.c` handles input lines without relying on a fixed-size buffer.
-
-The simulator allocates the page table and frame table dynamically. Allocation failures are reported and cleaned up. The simulator rejects invalid configuration values and invalid addresses rather than silently wrapping them.
-
-### Access algorithm
-
-1. Validate that the requested virtual address is in range.
-2. Compute the virtual page number and page offset.
-3. If the page-table entry is present, count a hit and update LRU metadata.
-4. Otherwise, count a page fault.
-5. Use a free frame if one exists; otherwise choose a victim according to FIFO or LRU and evict it.
-6. Map the requested page into the selected frame.
-7. Compute and print the physical address.
-
-### FIFO details
-
-Each successful page load receives an increasing load-order value. When memory is full, FIFO selects the resident page with the smallest load-order value. A hit does not change its FIFO age.
-
-### LRU details
-
-Each access receives an increasing logical timestamp. On a hit or load, the page's last-used timestamp is updated. When memory is full, LRU selects the resident page with the smallest last-used timestamp.
-
-## 9. Example output
-
-Exact counters and victim pages depend on the commands entered and the chosen policy.
-
-```text
-vm> access 0
-PAGE FAULT: virtual page 0 loaded into frame 0
-Virtual address: 0
-Page number:     0
-Offset:          0
-Frame number:    0
-Physical address: 0
-```
-
-## 10. Troubleshooting
-
-### `make: command not found`
-
-Install Make and the compiler:
-
-```bash
-sudo apt update
-sudo apt install build-essential make
-```
-
-### `./bin/vmem: No such file or directory`
-
-Build the program from the project root:
-
-```bash
-make
-```
-
-### `Permission denied` for the test
+The project includes a basic shell-based smoke test.
 
 Run:
 
 ```bash
-chmod +x tests/smoke_test.sh
 make test
 ```
 
-### Want to rebuild from scratch
+The test exercises basic address accesses, page-fault output, replacement-policy selection, statistics, and reset behavior.
+
+Expected successful output:
+
+```text
+Smoke test passed.
+```
+
+This is a lightweight smoke test and does not constitute exhaustive validation of every possible input or memory configuration.
+
+## Build Configuration
+
+The Makefile uses GCC with C11 support and common warning flags:
+
+```makefile
+-std=c11 -Wall -Wextra -Wpedantic -Werror
+```
+
+To remove generated object files and the executable:
 
 ```bash
 make clean
+```
+
+To rebuild the project:
+
+```bash
 make
 ```
 
-## 11. GitHub workflow
+## Limitations
 
-If you already cloned your repository, extract/copy the project files into that repository folder. Preserve the existing `.git` directory. Then:
+VMU is an educational simulator and has the following limitations:
 
-```bash
-git status
-git add README.md Makefile .gitignore include src tests docs
-git commit -m "Implement virtual memory simulator"
-git push
-```
+* It does not implement actual kernel-level virtual memory management.
+* It does not perform real disk-backed paging or swap operations.
+* It does not implement hardware-level TLB translation.
+* It does not implement multi-level page tables.
+* It does not provide process isolation or real memory protection.
+* It does not simulate concurrent memory accesses.
 
-If Git reports that there is no upstream branch, use the branch name shown by `git branch --show-current`:
+The simulated page tables and physical frames exist only within the program's allocated memory.
 
-```bash
-git push -u origin "$(git branch --show-current)"
-```
+## Future Enhancements
 
-Do not put passwords, access tokens, or private credentials in the repository.
+Potential extensions include:
 
-## 12. Scope and future improvements
+* Implementing a simulated backing store with swap-in and swap-out operations.
+* Adding a Translation Lookaside Buffer (TLB) with hit and miss statistics.
+* Supporting multi-level page tables.
+* Implementing read/write permissions and protection faults.
+* Adding file-based memory reference sequences for repeatable experiments.
+* Implementing additional page-replacement algorithms, such as Clock.
+* Providing graphical visualization of page tables, frames, and page faults.
 
-This project is a teaching simulator. It does not implement kernel-level demand paging, disk-backed swap, TLB hardware, multi-level page tables, process isolation, concurrency, or actual OS memory protection. Possible future extensions include:
+## Contributing
 
-- Simulated backing store and swap-in/swap-out.
-- A TLB cache and hit/miss statistics.
-- Multi-level page tables.
-- Read/write permissions and protection faults.
-- A workload file for repeatable reference strings.
-- Additional replacement algorithms such as Clock.
+Contributions, suggestions, and bug reports are welcome.
 
-## 13. Academic note
+To contribute:
 
-Use this README as project documentation and make sure you understand the source code before demonstrating or submitting it. Follow your course's rules for permitted assistance and disclose external assistance if your instructor requires it.
+1. Fork the repository.
+2. Create a feature branch.
+3. Implement and test your changes.
+4. Submit a pull request with a clear description of the changes.
+
+Please ensure that your changes compile successfully and that the existing smoke test passes.
+
+## License
+
+No license has been specified for this repository yet. Add a `LICENSE` file before granting others explicit permission to use, modify, or redistribute the project.
+
+---
+
+*Developed as an educational project to explore virtual memory management and operating system concepts using C.*
