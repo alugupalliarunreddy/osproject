@@ -4,7 +4,7 @@ A command-line virtual memory simulator written in C that demonstrates address t
 
 **Operating Systems and Systems Programming (OSSP) Project**
 
-![Language](https://img.shields.io/badge/Language-C11-blue)
+![Language](https://img.shields.io/badge/Language-C-blue)
 ![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Ubuntu-orange)
 ![Build](https://img.shields.io/badge/Build-GNU%20Make-green)
 ![Project](https://img.shields.io/badge/Type-Educational%20Simulator-purple)
