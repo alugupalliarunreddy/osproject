@@ -1,4 +1,5 @@
-bin/vmem
-src/*.o
+bin/
+*.o
 *.out
 *.log
+.DS_Store
